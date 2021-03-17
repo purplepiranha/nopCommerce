@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Copyright>Copyright © Purple Piranha Limited</Copyright>
+    <Company>Purple Piranha Limited</Company>
+    <Authors>Purple Piranha Limited</Authors>
+    <Version>4.4.0.0</Version>
+    <Description>Adds URL Rewrite functionality to NopCommerce.</Description>
+    <PackageProjectUrl>https://www.purplepiranha.co.uk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/purplepiranha/nopCommerce</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
+  </ItemGroup>
+
+</Project>
