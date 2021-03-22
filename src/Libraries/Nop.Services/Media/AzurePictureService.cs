@@ -14,7 +14,6 @@ using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
-using Nop.Services.Logging;
 using Nop.Services.Seo;
 
 namespace Nop.Services.Media
@@ -56,8 +55,7 @@ namespace Nop.Services.Media
             IStaticCacheManager staticCacheManager,
             IUrlRecordService urlRecordService,
             IWebHelper webHelper,
-            MediaSettings mediaSettings,
-            ILogger logger)
+            MediaSettings mediaSettings)
             : base(dataProvider,
                   downloadService,
                   httpContextAccessor,
@@ -69,8 +67,7 @@ namespace Nop.Services.Media
                   settingService,
                   urlRecordService,
                   webHelper,
-                  mediaSettings,
-                  logger)
+                  mediaSettings)
         {
             _staticCacheManager = staticCacheManager;
             _mediaSettings = mediaSettings;

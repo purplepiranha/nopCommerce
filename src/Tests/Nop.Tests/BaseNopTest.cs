@@ -555,11 +555,10 @@ namespace Nop.Tests
                 IProductAttributeParser productAttributeParser, IRepository<Picture> pictureRepository,
                 IRepository<PictureBinary> pictureBinaryRepository,
                 IRepository<ProductPicture> productPictureRepository, ISettingService settingService,
-                IUrlRecordService urlRecordService, IWebHelper webHelper, MediaSettings mediaSettings,
-                ILogger logger) : base(
+                IUrlRecordService urlRecordService, IWebHelper webHelper, MediaSettings mediaSettings) : base(
                 dataProvider, downloadService, httpContextAccessor, fileProvider, productAttributeParser,
                 pictureRepository, pictureBinaryRepository, productPictureRepository, settingService, urlRecordService,
-                webHelper, mediaSettings, logger)
+                webHelper, mediaSettings)
             {
             }
 
@@ -654,7 +653,7 @@ namespace Nop.Tests
                             {
                                 using var image = SKBitmap.Decode(pictureBinary);
                                 var format = GetImageFormatByMimeType(picture.MimeType);
-                                pictureBinary = await ImageResizeAsync (image, format, targetSize);
+                                pictureBinary = ImageResize(image, format, targetSize);
                             }
                             catch
                             {
