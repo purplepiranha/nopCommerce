@@ -94,7 +94,7 @@ namespace Nop.Tests
         {
             var objectProperties = typeof(T).GetProperties();
             var modelProperties = typeof(Tm).GetProperties();
-            
+
             foreach (var objectProperty in objectProperties)
             {
                 var name = objectProperty.Name;
@@ -109,7 +109,7 @@ namespace Nop.Tests
 
                 var objectPropertyValue = objectProperty.GetValue(entity);
                 var modelPropertyValue = modelProperty.GetValue(model);
-                
+
                 objectPropertyValue.Should().Be(modelPropertyValue, $"The property \"{typeof(T).Name}.{objectProperty.Name}\" of these objects is not equal");
             }
 
@@ -160,10 +160,10 @@ namespace Nop.Tests
             webHostEnvironment.Setup(p => p.EnvironmentName).Returns("test");
             webHostEnvironment.Setup(p => p.ApplicationName).Returns("nopCommerce");
             services.AddSingleton(webHostEnvironment.Object);
-            
+
             var httpContext = new DefaultHttpContext
             {
-                Request = {Headers = {{HeaderNames.Host, NopTestsDefaults.HostIpAddress}}}
+                Request = { Headers = { { HeaderNames.Host, NopTestsDefaults.HostIpAddress } } }
             };
 
             var httpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -348,12 +348,12 @@ namespace Nop.Tests
             //event consumers
             var consumers = typeFinder.FindClassesOfType(typeof(IConsumer<>)).ToList();
             foreach (var consumer in consumers)
-            foreach (var findInterface in consumer.FindInterfaces((type, criteria) =>
-            {
-                var isMatch = type.IsGenericType && ((Type)criteria).IsAssignableFrom(type.GetGenericTypeDefinition());
-                return isMatch;
-            }, typeof(IConsumer<>)))
-                services.AddTransient(findInterface, consumer);
+                foreach (var findInterface in consumer.FindInterfaces((type, criteria) =>
+                {
+                    var isMatch = type.IsGenericType && ((Type)criteria).IsAssignableFrom(type.GetGenericTypeDefinition());
+                    return isMatch;
+                }, typeof(IConsumer<>)))
+                    services.AddTransient(findInterface, consumer);
 
             services.AddSingleton<IInstallationService, InstallationService>();
 
@@ -555,10 +555,11 @@ namespace Nop.Tests
                 IProductAttributeParser productAttributeParser, IRepository<Picture> pictureRepository,
                 IRepository<PictureBinary> pictureBinaryRepository,
                 IRepository<ProductPicture> productPictureRepository, ISettingService settingService,
-                IUrlRecordService urlRecordService, IWebHelper webHelper, MediaSettings mediaSettings) : base(
+                IUrlRecordService urlRecordService, IWebHelper webHelper, MediaSettings mediaSettings,
+                ILogger logger) : base(
                 dataProvider, downloadService, httpContextAccessor, fileProvider, productAttributeParser,
                 pictureRepository, pictureBinaryRepository, productPictureRepository, settingService, urlRecordService,
-                webHelper, mediaSettings)
+                webHelper, mediaSettings, logger)
             {
             }
 
@@ -653,7 +654,7 @@ namespace Nop.Tests
                             {
                                 using var image = SKBitmap.Decode(pictureBinary);
                                 var format = GetImageFormatByMimeType(picture.MimeType);
-                                pictureBinary = ImageResize(image, format, targetSize);
+                                pictureBinary = await ImageResizeAsync(image, format, targetSize);
                             }
                             catch
                             {
