@@ -1056,8 +1056,9 @@ namespace Nop.Services.Media
                 }
                 return pictureBinary;
             }
-            catch
+            catch (Exception e)
             {
+                await _logger.WarningAsync("Validate picture failed", e);
                 return pictureBinary;
             }
         }
