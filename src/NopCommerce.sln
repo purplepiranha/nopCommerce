@@ -63,9 +63,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.AccessiB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Web.Extensions.Bootstrap4", "Presentation\Nop.Web.Extensions.Bootstrap4\Nop.Web.Extensions.Bootstrap4.csproj", "{2500036B-D747-4491-92DA-D9520E712809}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Extensions.UrlRewrite", "Extensions\Nop.Extensions.UrlRewrite\Nop.Extensions.UrlRewrite.csproj", "{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Extensions.UrlRewrite", "Extensions\Nop.Extensions.UrlRewrite\Nop.Extensions.UrlRewrite.csproj", "{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{752F979A-AAB8-4674-9081-747F10E1C503}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Extensions.MailerSend", "Extensions\Nop.Extensions.MailerSend\Nop.Extensions.MailerSend.csproj", "{8A08E8A3-E149-4142-829E-7B257FF39688}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -377,6 +379,18 @@ Global
 		{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A}.Release|x86.ActiveCfg = Release|Any CPU
 		{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A}.Release|x86.Build.0 = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Debug|x86.Build.0 = Debug|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|x86.ActiveCfg = Release|Any CPU
+		{8A08E8A3-E149-4142-829E-7B257FF39688}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -409,6 +423,7 @@ Global
 		{80CEF733-A369-4854-823D-847DFD5D8D87} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{2500036B-D747-4491-92DA-D9520E712809} = {B09156FB-8291-46A2-AF37-67CE97CFB5A6}
 		{2DCA8E7E-CCAF-43CA-8F01-D86317E5280A} = {752F979A-AAB8-4674-9081-747F10E1C503}
+		{8A08E8A3-E149-4142-829E-7B257FF39688} = {752F979A-AAB8-4674-9081-747F10E1C503}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}

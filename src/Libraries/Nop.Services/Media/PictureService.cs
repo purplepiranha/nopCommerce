@@ -12,6 +12,7 @@ using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
+using Nop.Services.Logging;
 using Nop.Services.Seo;
 using SkiaSharp;
 
@@ -36,6 +37,7 @@ namespace Nop.Services.Media
         private readonly IUrlRecordService _urlRecordService;
         private readonly IWebHelper _webHelper;
         private readonly MediaSettings _mediaSettings;
+        private readonly ILogger _logger;
 
         #endregion
 
@@ -52,7 +54,8 @@ namespace Nop.Services.Media
             ISettingService settingService,
             IUrlRecordService urlRecordService,
             IWebHelper webHelper,
-            MediaSettings mediaSettings)
+            MediaSettings mediaSettings,
+            ILogger logger)
         {
             _dataProvider = dataProvider;
             _downloadService = downloadService;
@@ -66,6 +69,7 @@ namespace Nop.Services.Media
             _urlRecordService = urlRecordService;
             _webHelper = webHelper;
             _mediaSettings = mediaSettings;
+            _logger = logger;
         }
 
         #endregion
@@ -365,7 +369,7 @@ namespace Nop.Services.Media
         /// <param name="format">Destination format</param>
         /// <param name="targetSize">Target size</param>
         /// <returns>Image as array of byte[]</returns>
-        protected virtual byte[] ImageResize(SKBitmap image, SKEncodedImageFormat format, int targetSize)
+        protected virtual async Task<byte[]> ImageResizeAsync(SKBitmap image, SKEncodedImageFormat format, int targetSize)
         {
             if (image == null)
                 throw new ArgumentNullException("Image is null");
@@ -397,8 +401,9 @@ namespace Nop.Services.Media
                 //In order to exclude saving pictures in low quality at the time of installation, we will set the value of this parameter to 80 (as by default)
                 return cropImage.Encode(format, _mediaSettings.DefaultImageQuality > 0 ? _mediaSettings.DefaultImageQuality : 80).ToArray();
             }
-            catch
+            catch (Exception e)
             {
+                await _logger.WarningAsync("Image resize failed", e);
                 return image.Bytes;
             }
 
@@ -511,7 +516,7 @@ namespace Nop.Services.Media
                     using var image = SKBitmap.Decode(filePath);
                     var codec = SKCodec.Create(filePath);
                     var format = codec.EncodedFormat;
-                    var pictureBinary = ImageResize(image, format, targetSize);
+                    var pictureBinary = await ImageResizeAsync(image, format, targetSize);
                     SaveThumbAsync(thumbFilePath, thumbFileName, string.Empty, pictureBinary).Wait();
                 }
                 finally
@@ -643,7 +648,7 @@ namespace Nop.Services.Media
                         {
                             using var image = SKBitmap.Decode(pictureBinary);
                             var format = GetImageFormatByMimeType(picture.MimeType);
-                            pictureBinary = ImageResize(image, format, targetSize);
+                            pictureBinary = await ImageResizeAsync (image, format, targetSize);
                         }
                         catch
                         {
@@ -1037,7 +1042,7 @@ namespace Nop.Services.Media
         /// A task that represents the asynchronous operation
         /// The task result contains the picture binary or throws an exception
         /// </returns>
-        public virtual Task<byte[]> ValidatePictureAsync(byte[] pictureBinary, string mimeType)
+        public virtual async Task<byte[]> ValidatePictureAsync(byte[] pictureBinary, string mimeType)
         {
             try
             {
@@ -1047,13 +1052,13 @@ namespace Nop.Services.Media
                 if (Math.Max(image.Height, image.Width) > _mediaSettings.MaximumImageSize)
                 {
                     var format = GetImageFormatByMimeType(mimeType);
-                    pictureBinary = ImageResize(image, format, _mediaSettings.MaximumImageSize);
+                    pictureBinary = await ImageResizeAsync(image, format, _mediaSettings.MaximumImageSize);
                 }
-                return Task.FromResult(pictureBinary);
+                return pictureBinary;
             }
             catch
             {
-                return Task.FromResult(pictureBinary);
+                return pictureBinary;
             }
         }
 
