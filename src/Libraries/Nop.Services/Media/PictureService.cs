@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LinqToDB;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Media;
@@ -363,6 +364,22 @@ namespace Nop.Services.Media
         }
 
         /// <summary>
+        /// Gets the MIME type from the file name
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        protected virtual string GetMimeTypeFromFileName(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
+
+        /// <summary>
         /// Resize image by targetSize
         /// </summary>
         /// <param name="image">Source image</param>
@@ -517,7 +534,8 @@ namespace Nop.Services.Media
                     var codec = SKCodec.Create(filePath);
                     var format = codec.EncodedFormat;
                     var pictureBinary = await ImageResizeAsync(image, format, targetSize);
-                    SaveThumbAsync(thumbFilePath, thumbFileName, string.Empty, pictureBinary).Wait();
+                    var mimeType = GetMimeTypeFromFileName(thumbFileName);
+                    SaveThumbAsync(thumbFilePath, thumbFileName, mimeType, pictureBinary).Wait();
                 }
                 finally
                 {
@@ -615,7 +633,7 @@ namespace Nop.Services.Media
                 mutex.WaitOne();
                 try
                 {
-                    SaveThumbAsync(thumbFilePath, thumbFileName, string.Empty, pictureBinary).Wait();
+                    SaveThumbAsync(thumbFilePath, thumbFileName, picture.MimeType, pictureBinary).Wait();
                 }
                 finally
                 {
@@ -655,7 +673,7 @@ namespace Nop.Services.Media
                         }
                     }
 
-                    SaveThumbAsync(thumbFilePath, thumbFileName, string.Empty, pictureBinary).Wait();
+                    SaveThumbAsync(thumbFilePath, thumbFileName, picture.MimeType, pictureBinary).Wait();
                 }
                 finally
                 {
