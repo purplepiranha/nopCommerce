@@ -10,6 +10,8 @@
     <PackageProjectUrl>https://www.purplepiranha.co.uk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/purplepiranha/nopCommerce</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
