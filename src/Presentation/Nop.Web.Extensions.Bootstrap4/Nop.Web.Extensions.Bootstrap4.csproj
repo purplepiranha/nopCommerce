@@ -2,8 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Copyright>Copyright © Purple Piranha Limited</Copyright>
+    <Company>Purple Piranha Limited</Company>
+    <Authors>Purple Piranha Limited</Authors>
+    <Version>4.4.0.0</Version>
+    <Description>Adds Bootstrap 4 functionality to NopCommerce.</Description>
+    <PackageProjectUrl>https://www.purplepiranha.co.uk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/purplepiranha/nopCommerce</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,4 +24,7 @@
     <ProjectReference Include="..\Nop.Web.Framework\Nop.Web.Framework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
 </Project>
