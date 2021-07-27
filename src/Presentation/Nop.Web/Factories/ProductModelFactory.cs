@@ -454,7 +454,7 @@ namespace Nop.Web.Factories
                     {
                         //calculate price for the maximum quantity if we have tier prices, and choose minimal
                         tmpMinPossiblePrice = Math.Min(tmpMinPossiblePrice,
-                            (await _priceCalculationService.GetFinalPriceAsync(associatedProduct, await _workContext.GetCurrentCustomerAsync(), quantity: int.MaxValue)).Item1);
+                            (await _priceCalculationService.GetFinalPriceAsync(associatedProduct, await _workContext.GetCurrentCustomerAsync(), quantity: int.MaxValue)).priceWithoutDiscounts);
                     }
 
                     if (minPossiblePrice.HasValue && tmpMinPossiblePrice >= minPossiblePrice.Value)
@@ -764,7 +764,9 @@ namespace Nop.Web.Factories
                     product.PreOrderAvailabilityStartDateTimeUtc.Value >= DateTime.UtcNow;
                 model.PreOrderAvailabilityStartDateTimeUtc = product.PreOrderAvailabilityStartDateTimeUtc;
 
-                if (model.PreOrderAvailabilityStartDateTimeUtc.HasValue && _catalogSettings.DisplayDatePreOrderAvailability)
+                if (model.AvailableForPreOrder &&
+                    model.PreOrderAvailabilityStartDateTimeUtc.HasValue &&
+                    _catalogSettings.DisplayDatePreOrderAvailability)
                 {
                     model.PreOrderAvailabilityStartDateTimeUserTime =
                         (await _dateTimeHelper.ConvertToUserTimeAsync(model.PreOrderAvailabilityStartDateTimeUtc.Value)).ToString("D");
@@ -1028,7 +1030,7 @@ namespace Nop.Web.Factories
                 {
                     var priceBase = (await _taxService.GetProductPriceAsync(product, (await _priceCalculationService.GetFinalPriceAsync(product,
                         await _workContext.GetCurrentCustomerAsync(), decimal.Zero, _catalogSettings.DisplayTierPricesWithDiscounts,
-                        tierPrice.Quantity)).Item1)).price;
+                        tierPrice.Quantity)).priceWithoutDiscounts)).price;
 
                        var price = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(priceBase, await _workContext.GetWorkingCurrencyAsync());
 
