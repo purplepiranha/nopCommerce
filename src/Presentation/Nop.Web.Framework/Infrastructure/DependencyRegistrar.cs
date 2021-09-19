@@ -21,6 +21,7 @@ using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Discounts;
+using Nop.Services.EUCookieLaw;
 using Nop.Services.Events;
 using Nop.Services.ExportImport;
 using Nop.Services.Forums;
@@ -276,6 +277,9 @@ namespace Nop.Web.Framework.Infrastructure
                     return isMatch;
                 }, typeof(IConsumer<>)))
                     services.AddScoped(findInterface, consumer);
+
+            // EU Cookie Law
+            services.AddScoped<IEUCookieLawService, EUCookieLawService>();
         }
 
         /// <summary>

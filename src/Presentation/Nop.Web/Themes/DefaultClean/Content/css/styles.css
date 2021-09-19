@@ -797,32 +797,99 @@ label, label + * {
 
 .eu-cookie-bar-notification {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1050;
-  width: 320px;
-  height: 180px;
-  margin: -90px 0 0 -160px;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 2px rgba(0,0,0,0.15);
-  background-color: #fff;
-  padding: 20px;
-  text-align: center;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+  .eu-cookie-bar-notification .content {
+    border: 1px solid #ccc;
+    box-shadow: 0 0 2px rgba(0,0,0,0.15);
+    text-align: left;
+    background-color: #FFF;
+    width: 600px;
+    padding: 20px 0;
+  }
+
 .eu-cookie-bar-notification .text {
+  padding: 0 20px;
   margin-bottom: 20px;
   line-height: 20px;
 }
 
-.eu-cookie-bar-notification button {
-  min-width: 60px;
-  margin: 5px 0 10px;
-  border: none;
-  background-color: #4ab2f1;
-  padding: 8px 12px;
-  font-size: 14px;
-  color: #fff;
+  .eu-cookie-bar-notification .text h1 {
+      margin-bottom: 20px;
+
+  }
+
+  .eu-cookie-bar-notification .text .description {
+    margin-bottom: 20px;
+  }
+
+
+  .eu-cookie-bar-notification .purposes {
+    padding: 20px 20px 0 20px;
+    border-top: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eu-cookie-bar-notification .purpose {
+    margin-bottom: 20px;
+    line-height: 20px;
+    text-align: left;
+    display: flex;
+    flex-direction: row;
+  }
+
+    .eu-cookie-bar-notification .purpose .desc {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .eu-cookie-bar-notification .purpose .check {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-left: 20px;
+    }
+
+    .eu-cookie-bar-notification .purpose .check input[type=checkbox] {
+      -ms-transform: scale(2); /* IE */
+      -moz-transform: scale(2); /* FF */
+      -webkit-transform: scale(2); /* Safari and Chrome */
+      -o-transform: scale(2); /* Opera */
+      transform: scale(2);
+    }
+
+  .eu-cookie-bar-notification .cookie-buttons
+  {
+      display: flex;
+      flex-direction: row;
+      padding: 0 20px;
+      column-gap: 20px;
+  }
+
+  .eu-cookie-bar-notification button {
+    min-width: 60px;
+    margin: 5px 0 10px;
+    border: none;
+    background-color: #4ab2f1;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #fff;
+    flex: 1;
+  }
+
+.eu-cookie-bar-notification button.selected-button {
+  display: none;
 }
 
 .eu-cookie-bar-notification button:hover,

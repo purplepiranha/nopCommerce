@@ -316,14 +316,21 @@ namespace Nop.Web.Controllers
         [CheckAccessClosedStore(true)]
         //available even when navigation is not allowed
         [CheckAccessPublicStore(true)]
-        public virtual async Task<IActionResult> EuCookieLawAccept()
+        public virtual async Task<IActionResult> EuCookieLawAccept(string purposes = "")
         {
             if (!_storeInformationSettings.DisplayEuCookieLawWarning)
                 //disabled
                 return Json(new { stored = false });
 
-            //save setting
+            //save settings
+
+            // old way - we could probably remove this but it may break existing plugins
             await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, true, (await _storeContext.GetCurrentStoreAsync()).Id);
+
+            // new way - store a comma seperated list of purposes
+            // note - neccessary purposes aren't stored as they are accepted by default
+            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedPurposesAttribute, purposes, (await _storeContext.GetCurrentStoreAsync()).Id);
+
             return Json(new { stored = true });
         }
 

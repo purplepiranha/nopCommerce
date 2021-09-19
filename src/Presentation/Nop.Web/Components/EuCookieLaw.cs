@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain;
 using Nop.Core.Domain.Customers;
+using Nop.Core.EUCookieLaw;
 using Nop.Core.Http;
 using Nop.Services.Common;
+using Nop.Services.EUCookieLaw;
 using Nop.Web.Framework.Components;
 
 namespace Nop.Web.Components
@@ -16,16 +19,19 @@ namespace Nop.Web.Components
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
         private readonly StoreInformationSettings _storeInformationSettings;
+        private readonly IEUCookieLawService _cookieService;
 
         public EuCookieLawViewComponent(IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
             IWorkContext workContext,
-            StoreInformationSettings storeInformationSettings)
+            StoreInformationSettings storeInformationSettings,
+            IEUCookieLawService cookieService)
         {
             _genericAttributeService = genericAttributeService;
             _storeContext = storeContext;
             _workContext = workContext;
             _storeInformationSettings = storeInformationSettings;
+            _cookieService = cookieService;
         }
 
         /// <returns>A task that represents the asynchronous operation</returns>
@@ -48,7 +54,9 @@ namespace Nop.Web.Components
             if (TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"] != null && Convert.ToBoolean(TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"]))
                 return Content("");
 
-            return View();
+            var purposes = (await _cookieService.GetAllCookiesAsync()).Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).ToList();
+
+            return View(purposes);
         }
     }
 }
