@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nop.Core.EUCookieLaw;
+using Nop.Services.EUCookieLaw;
 
 namespace Nop.Web.Framework.EUCookieLaw.Purposes
 {

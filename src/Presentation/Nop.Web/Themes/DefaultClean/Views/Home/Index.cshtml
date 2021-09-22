@@ -1,6 +1,5 @@
 ﻿@using Nop.Core.Domain.Seo
 @inject SeoSettings seoSettings
-@inject Nop.Services.EUCookieLaw.IEUCookieLawService cookieService
 @{
     Layout = "_ColumnsOne";
 
@@ -21,7 +20,6 @@
 }
 <div class="page home-page">
     <div class="page-body">
-
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HomepageTop })
         @await Component.InvokeAsync("TopicBlock", new { systemName = "HomepageText" })
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HomepageBeforeCategories })
@@ -35,14 +33,5 @@
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HomepageBeforePoll })
         @await Component.InvokeAsync("HomepagePolls")
         @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.HomepageBottom })
-        @{ 
-            var cookies = await cookieService.GetAllCookiesAsync();
-            foreach(var cookie in cookies)
-            {
-                <p>
-                    @cookie.Name
-                </p>
-            }
-        }
     </div>
 </div>

@@ -1,8 +1,11 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
+using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers;
 using Nop.Plugin.Widgets.GoogleAnalytics.Models;
 using Nop.Services.Configuration;
+using Nop.Services.EUCookieLaw;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
 using Nop.Services.Security;
@@ -12,9 +15,6 @@ using Nop.Web.Framework.Mvc.Filters;
 
 namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
 {
-    [Area(AreaNames.Admin)]
-    [AuthorizeAdmin]
-    [AutoValidateAntiforgeryToken]
     public class WidgetsGoogleAnalyticsController : BasePluginController
     {
         #region Fields
@@ -24,6 +24,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
+        private readonly ICookiePurposeManager _cookiePurposeManager;
 
         #endregion
 
@@ -34,19 +35,24 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
             INotificationService notificationService,
             IPermissionService permissionService,
             ISettingService settingService,
-            IStoreContext storeContext)
+            IStoreContext storeContext,
+            ICookiePurposeManager cookiePurposeManager
+            )
         {
             _localizationService = localizationService;
             _notificationService = notificationService;
             _permissionService = permissionService;
             _settingService = settingService;
             _storeContext = storeContext;
+            _cookiePurposeManager = cookiePurposeManager;
         }
 
         #endregion
 
         #region Methods
-        
+        [Area(AreaNames.Admin)]
+        [AuthorizeAdmin]
+        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Configure()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -80,6 +86,9 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
             return View("~/Plugins/Widgets.GoogleAnalytics/Views/Configure.cshtml", model);
         }
 
+        [Area(AreaNames.Admin)]
+        [AuthorizeAdmin]
+        [AutoValidateAntiforgeryToken]
         [HttpPost]
         public async Task<IActionResult> Configure(ConfigurationModel model)
         {
@@ -115,6 +124,14 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
             return await Configure();
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> GetConsentStatus()
+        {
+            var ads = (await _cookiePurposeManager.IsProviderAllowed<GoogleMarketingCookieProvider>()) ? "granted" : "denied";
+            var analytics = await _cookiePurposeManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>() ? "granted" : "denied";
+            return new JsonResult(new { ad_storage = ads, analytics_storage = analytics });
+        }
         #endregion
     }
 }

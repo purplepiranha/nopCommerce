@@ -279,7 +279,8 @@ namespace Nop.Web.Framework.Infrastructure
                     services.AddScoped(findInterface, consumer);
 
             // EU Cookie Law
-            services.AddScoped<IEUCookieLawService, EUCookieLawService>();
+            services.AddSingleton<ICookieProviderManager, CookieProviderManager>();
+            services.AddScoped<ICookiePurposeManager, CookiePurposeManager>();
         }
 
         /// <summary>

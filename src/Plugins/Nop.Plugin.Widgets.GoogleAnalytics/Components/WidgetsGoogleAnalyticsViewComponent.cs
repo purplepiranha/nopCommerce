@@ -5,13 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
+using Nop.Core.Domain;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
+using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers;
+using Nop.Plugin.Widgets.GoogleAnalytics.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
+using Nop.Services.EUCookieLaw;
 using Nop.Services.Logging;
 using Nop.Services.Orders;
 using Nop.Web.Framework.Components;
@@ -37,6 +41,8 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
+        private readonly StoreInformationSettings _storeInformationSettings;
+        private readonly ICookiePurposeManager _cookiePurposeManager;
 
         #endregion
 
@@ -53,7 +59,9 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             IProductService productService,
             ISettingService settingService,
             IStoreContext storeContext,
-            IWorkContext workContext)
+            IWorkContext workContext,
+            StoreInformationSettings storeInformationSettings,
+            ICookiePurposeManager cookiePurposeManager)
         {
             _currencySettings = currencySettings;
             _googleAnalyticsSettings = googleAnalyticsSettings;
@@ -67,6 +75,8 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             _settingService = settingService;
             _storeContext = storeContext;
             _workContext = workContext;
+            _storeInformationSettings = storeInformationSettings;
+            _cookiePurposeManager = cookiePurposeManager;
         }
 
         #endregion
@@ -182,6 +192,27 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
                 analyticsTrackingScript = analyticsTrackingScript.Replace("{ECOMMERCE_TRACKING}", "");
             }
 
+            // consent
+            if (_storeInformationSettings.DisplayEuCookieLawWarning)
+            {
+                var allowAnalytics = await _cookiePurposeManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>();
+                var allowMarketing = await _cookiePurposeManager.IsProviderAllowed<GoogleMarketingCookieProvider>();
+
+                var consentDefaultScript = @"gtag('consent', 'default', {
+                    'ad_storage': '{ADSTORAGE}',
+                    'analytics_storage': '{ANALYTICSSTORAGE}'
+                });";
+
+                consentDefaultScript = consentDefaultScript.Replace("{ADSTORAGE}", allowMarketing ? "granted" : "denied");
+                consentDefaultScript = consentDefaultScript.Replace("{ANALYTICSSTORAGE}", allowAnalytics ? "granted" : "denied");
+
+                analyticsTrackingScript = analyticsTrackingScript.Replace("{CONSENT_DEFAULT}", consentDefaultScript);
+            }
+            else
+            {
+                analyticsTrackingScript = analyticsTrackingScript.Replace("{CONSENT_DEFAULT}", "");
+            }
+
             return analyticsTrackingScript;
         }
 
@@ -220,7 +251,12 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             {
                 await _logger.InsertLogAsync(Core.Domain.Logging.LogLevel.Error, "Error creating scripts for Google eCommerce tracking", ex.ToString());
             }
-            return View("~/Plugins/Widgets.GoogleAnalytics/Views/PublicInfo.cshtml", script);
+
+            var model = new PublicInfoModel();
+            model.TrackingScript = script;
+            model.AddCookieConsentChangedScriptsToFooter = _storeInformationSettings.DisplayEuCookieLawWarning;
+
+            return View("~/Plugins/Widgets.GoogleAnalytics/Views/PublicInfo.cshtml", model);
         }
 
         #endregion

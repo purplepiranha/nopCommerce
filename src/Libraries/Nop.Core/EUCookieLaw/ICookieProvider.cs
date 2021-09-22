@@ -14,5 +14,7 @@ namespace Nop.Core.EUCookieLaw
         string PrivacyPolicyUrl { get; }
         ICookiePurpose CookiePurpose { get; }
         int Order { get; }
+
+        Task<bool> IsActiveAsync();
     }
 }

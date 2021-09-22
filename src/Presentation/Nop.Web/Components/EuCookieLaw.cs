@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain;
 using Nop.Core.Domain.Customers;
-using Nop.Core.EUCookieLaw;
+using Nop.Services.EUCookieLaw;
 using Nop.Core.Http;
 using Nop.Services.Common;
-using Nop.Services.EUCookieLaw;
 using Nop.Web.Framework.Components;
 
 namespace Nop.Web.Components
@@ -19,19 +18,19 @@ namespace Nop.Web.Components
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
         private readonly StoreInformationSettings _storeInformationSettings;
-        private readonly IEUCookieLawService _cookieService;
+        private readonly ICookieProviderManager _cookieProviderManager;
 
         public EuCookieLawViewComponent(IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
             IWorkContext workContext,
             StoreInformationSettings storeInformationSettings,
-            IEUCookieLawService cookieService)
+            ICookieProviderManager cookieProviderManager)
         {
             _genericAttributeService = genericAttributeService;
             _storeContext = storeContext;
             _workContext = workContext;
             _storeInformationSettings = storeInformationSettings;
-            _cookieService = cookieService;
+            _cookieProviderManager = cookieProviderManager;
         }
 
         /// <returns>A task that represents the asynchronous operation</returns>
@@ -54,7 +53,11 @@ namespace Nop.Web.Components
             if (TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"] != null && Convert.ToBoolean(TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"]))
                 return Content("");
 
-            var purposes = (await _cookieService.GetAllCookiesAsync()).Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).ToList();
+            var purposes = await _cookieProviderManager.GetAllCookieProviders()
+                .OrderBy(x => x.CookiePurpose.Order)
+                .ThenBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).ToListAsync();
 
             return View(purposes);
         }

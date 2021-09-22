@@ -1,4 +1,7 @@
 ﻿@model IList<Nop.Core.EUCookieLaw.ICookiePurpose> 
+<script asp-location="Head">
+    const cookieConsentChanged = new Event('cookieConsentChanged');
+</script>
 <script asp-location="Footer">
     $(document).ready(function () {
         $('#eu-cookie-bar-notification').show();
@@ -39,6 +42,7 @@
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
                 $('#eu-cookie-bar-notification').hide();
+                window.dispatchEvent(cookieConsentChanged);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Cannot store value');

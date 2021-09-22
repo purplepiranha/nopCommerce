@@ -4,8 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nop.Core.EUCookieLaw;
 
-namespace Nop.Core.EUCookieLaw
+namespace Nop.Services.EUCookieLaw
 {
     public class CookiePurposeEqualityComparer : IEqualityComparer<ICookiePurpose>
     {

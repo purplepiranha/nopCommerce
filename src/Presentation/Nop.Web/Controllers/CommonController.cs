@@ -11,6 +11,7 @@ using Nop.Core.Domain.Tax;
 using Nop.Core.Domain.Vendors;
 using Nop.Services.Common;
 using Nop.Services.Directory;
+using Nop.Services.EUCookieLaw;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
@@ -45,6 +46,7 @@ namespace Nop.Web.Controllers
         private readonly SitemapXmlSettings _sitemapXmlSettings;
         private readonly StoreInformationSettings _storeInformationSettings;
         private readonly VendorSettings _vendorSettings;
+        private readonly ICookiePurposeManager _cookiePurposeManager;
 
         #endregion
 
@@ -67,7 +69,8 @@ namespace Nop.Web.Controllers
             SitemapSettings sitemapSettings,
             SitemapXmlSettings sitemapXmlSettings,
             StoreInformationSettings storeInformationSettings,
-            VendorSettings vendorSettings)
+            VendorSettings vendorSettings,
+            ICookiePurposeManager cookiePurposeManager)
         {
             _captchaSettings = captchaSettings;
             _commonSettings = commonSettings;
@@ -87,6 +90,7 @@ namespace Nop.Web.Controllers
             _sitemapXmlSettings = sitemapXmlSettings;
             _storeInformationSettings = storeInformationSettings;
             _vendorSettings = vendorSettings;
+            _cookiePurposeManager = cookiePurposeManager;
         }
 
         #endregion
@@ -323,13 +327,7 @@ namespace Nop.Web.Controllers
                 return Json(new { stored = false });
 
             //save settings
-
-            // old way - we could probably remove this but it may break existing plugins
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, true, (await _storeContext.GetCurrentStoreAsync()).Id);
-
-            // new way - store a comma seperated list of purposes
-            // note - neccessary purposes aren't stored as they are accepted by default
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedPurposesAttribute, purposes, (await _storeContext.GetCurrentStoreAsync()).Id);
+            await _cookiePurposeManager.SetAllowed(purposes);
 
             return Json(new { stored = true });
         }

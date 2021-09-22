@@ -83,6 +83,8 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
 
+                  {CONSENT_DEFAULT}
+
                   gtag('config', '{GOOGLEID}');
                   {CUSTOMER_TRACKING}
                   {ECOMMERCE_TRACKING}
