@@ -54,6 +54,10 @@ RUN dotnet build Nop.Plugin.Widgets.NivoSlider.csproj -c Release
 WORKDIR /src/Presentation/Nop.Web   
 RUN dotnet publish Nop.Web.csproj -c Release -o /app/published
 
+# remove anything that is handled within Azure File Storage
+RUN rm -r /app/published/App_Data
+RUN rm -r /app/published/wwwroot/images
+
 # create the runtime instance 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS runtime 
 
