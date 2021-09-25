@@ -65,6 +65,12 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 RUN apk add libgdiplus --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted
 RUN apk add libc-dev --no-cache
 
+# Enable and conigure SSH:
+RUN apk add --no-cache --update openssh-server \
+	&& echo "root:Docker!" | chpasswd
+
+COPY sshd_config /etc/ssh/
+
 # copy entrypoint script
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
