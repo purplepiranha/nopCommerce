@@ -73,9 +73,10 @@ COPY sshd_config /etc/ssh/
 
 # copy entrypoint script
 COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod 755 /entrypoint.sh
+RUN chmod 0755 /entrypoint.sh
 
-WORKDIR /app        
+WORKDIR /app      
+EXPOSE 80 2222  
 RUN mkdir bin
 RUN mkdir logs  
                                                             
