@@ -12,7 +12,7 @@ using Nop.Web.Framework.Components;
 
 namespace Nop.Web.Components
 {
-    public class EuCookieLawViewComponent : NopViewComponent
+    public class EuCookieLawChangeViewComponent : NopViewComponent
     {
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IStoreContext _storeContext;
@@ -20,7 +20,7 @@ namespace Nop.Web.Components
         private readonly StoreInformationSettings _storeInformationSettings;
         private readonly ICookieRegistrar _cookieProviderManager;
 
-        public EuCookieLawViewComponent(IGenericAttributeService genericAttributeService,
+        public EuCookieLawChangeViewComponent(IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
             IWorkContext workContext,
             StoreInformationSettings storeInformationSettings,
@@ -44,7 +44,17 @@ namespace Nop.Web.Components
             if ((await _workContext.GetCurrentCustomerAsync()).IsSearchEngineAccount())
                 return Content("");
 
-            return View();
+            if (!await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, (await _storeContext.GetCurrentStoreAsync()).Id))
+                //not yet accepted
+                return Content("");
+
+            var purposes = await _cookieProviderManager.GetAllCookieProviders()
+                .OrderBy(x => x.CookiePurpose.Order)
+                .ThenBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).ToListAsync();
+
+            return View(purposes);
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain;
 using Nop.Core.Domain.Common;
-using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Security;
 using Nop.Core.Domain.Tax;
@@ -46,8 +47,8 @@ namespace Nop.Web.Controllers
         private readonly SitemapXmlSettings _sitemapXmlSettings;
         private readonly StoreInformationSettings _storeInformationSettings;
         private readonly VendorSettings _vendorSettings;
-        private readonly ICookiePurposeManager _cookiePurposeManager;
-
+        private readonly ICookieManager _cookieManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         #endregion
 
         #region Ctor
@@ -70,7 +71,8 @@ namespace Nop.Web.Controllers
             SitemapXmlSettings sitemapXmlSettings,
             StoreInformationSettings storeInformationSettings,
             VendorSettings vendorSettings,
-            ICookiePurposeManager cookiePurposeManager)
+            ICookieManager cookieManager,
+            IHttpContextAccessor httpContextAccessor)
         {
             _captchaSettings = captchaSettings;
             _commonSettings = commonSettings;
@@ -90,7 +92,8 @@ namespace Nop.Web.Controllers
             _sitemapXmlSettings = sitemapXmlSettings;
             _storeInformationSettings = storeInformationSettings;
             _vendorSettings = vendorSettings;
-            _cookiePurposeManager = cookiePurposeManager;
+            _cookieManager = cookieManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #endregion
@@ -327,9 +330,29 @@ namespace Nop.Web.Controllers
                 return Json(new { stored = false });
 
             //save settings
-            await _cookiePurposeManager.SetAllowed(purposes);
+            await _cookieManager.UpdateCookieAcceptance(purposes);
 
             return Json(new { stored = true });
+        }
+
+        [HttpGet]
+        //available even when a store is closed
+        [CheckAccessClosedStore(true)]
+        //available even when navigation is not allowed
+        [CheckAccessPublicStore(true)]
+        public virtual async Task<IActionResult> EuCookieLawChange()
+        {
+            return ViewComponent("EuCookieLawChange");
+        }
+
+        [HttpGet]
+        //available even when a store is closed
+        [CheckAccessClosedStore(true)]
+        //available even when navigation is not allowed
+        [CheckAccessPublicStore(true)]
+        public virtual async Task<IActionResult> EuCookieLawDialog()
+        {
+            return ViewComponent("EuCookieLawDialog", new { isChangeRequest = true });
         }
 
         //robots.txt file

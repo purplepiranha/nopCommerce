@@ -5,6 +5,7 @@
 <script asp-location="Footer">
     $(document).ready(function () {
         $(window).on('cookieConsentChanged', function () {
+            alert("consent changed");
             $.ajax({
                 cache: false,
                 type: "GET",
@@ -12,6 +13,11 @@
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {
                     gtag('consent', 'update', data);
+                    if (data.ad_storage == 'consent') {
+                        gtag("set", "ads_data_redaction", false);
+                    } else {
+                        gtag("set", "ads_data_redaction", true);
+                    }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert('Cannot get value');

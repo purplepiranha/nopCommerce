@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Nop.Core.EUCookieLaw
 {
@@ -14,6 +10,7 @@ namespace Nop.Core.EUCookieLaw
         string PrivacyPolicyUrl { get; }
         ICookiePurpose CookiePurpose { get; }
         int Order { get; }
+        string[] CookieNames { get; }
 
         Task<bool> IsActiveAsync();
     }

@@ -12,7 +12,7 @@ using Nop.Web.Framework.Components;
 
 namespace Nop.Web.Components
 {
-    public class EuCookieLawViewComponent : NopViewComponent
+    public class EuCookieLawDialogViewComponent : NopViewComponent
     {
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IStoreContext _storeContext;
@@ -20,7 +20,7 @@ namespace Nop.Web.Components
         private readonly StoreInformationSettings _storeInformationSettings;
         private readonly ICookieRegistrar _cookieProviderManager;
 
-        public EuCookieLawViewComponent(IGenericAttributeService genericAttributeService,
+        public EuCookieLawDialogViewComponent(IGenericAttributeService genericAttributeService,
             IStoreContext storeContext,
             IWorkContext workContext,
             StoreInformationSettings storeInformationSettings,
@@ -34,17 +34,24 @@ namespace Nop.Web.Components
         }
 
         /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(bool isChangeRequest = false)
         {
-            if (!_storeInformationSettings.DisplayEuCookieLawWarning)
-                //disabled
+            if (!isChangeRequest && await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, (await _storeContext.GetCurrentStoreAsync()).Id))
+                //already accepted
                 return Content("");
 
-            //ignore search engines because some pages could be indexed with the EU cookie as description
-            if ((await _workContext.GetCurrentCustomerAsync()).IsSearchEngineAccount())
+            //ignore notification?
+            //right now it's used during logout so popup window is not displayed twice
+            if (!isChangeRequest && TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"] != null && Convert.ToBoolean(TempData[$"{NopCookieDefaults.Prefix}{NopCookieDefaults.IgnoreEuCookieLawWarning}"]))
                 return Content("");
 
-            return View();
+            var purposes = await _cookieProviderManager.GetAllCookieProviders()
+                .OrderBy(x => x.CookiePurpose.Order)
+                .ThenBy(x => x.Order)
+                .ThenBy(x => x.Name)
+                .Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).ToListAsync();
+
+            return View(purposes);
         }
     }
 }

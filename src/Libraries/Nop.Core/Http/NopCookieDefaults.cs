@@ -59,5 +59,10 @@
         /// Gets a cookie name of the Eu Cookie Law Warning
         /// </summary>
         public static string IgnoreEuCookieLawWarning => ".IgnoreEuCookieLawWarning";
+
+        /// <summary>
+        /// Gets a cookie name of the cookie consent allowed purposes
+        /// </summary>
+        public static string EuCookieConsentPurposesCookie => ".CookieConsentAllowedPurposes";
     }
 }

@@ -1,30 +1,36 @@
-﻿@model IList<Nop.Core.EUCookieLaw.ICookiePurpose> 
+﻿<div id="eu-cookie-dialog">
+    @await Component.InvokeAsync("EuCookieLawDialog")
+</div>
+<div id="eu-cookie-change">
+    @await Component.InvokeAsync("EuCookieLawChange")
+</div>
 <script asp-location="Head">
+    const cookieConsentAccepted = new Event('cookieConsentAccepted');
     const cookieConsentChanged = new Event('cookieConsentChanged');
 </script>
 <script asp-location="Footer">
     $(document).ready(function () {
-        $('#eu-cookie-bar-notification').show();
 
-        $('#eu-cookie-accept-all').on('click', function () {
+        $('#eu-cookie-dialog').on('click', '#eu-cookie-accept-all', function () {
             var purposes = $("input[data-purpose]").map(function () {
                 return $(this).data('purpose');
             }).get().join(',');
-            //alert(purposes);
             setEUCookieLawPreferences(purposes);
         });
 
-        $('#eu-cookie-accept-selected').on('click', function () {
+        $('#eu-cookie-dialog').on('click', '#eu-cookie-accept-selected', function () {
             var purposes = $("input[data-purpose]:checked").map(function () {
                 return $(this).data('purpose');
             }).get().join(',');
-            //alert(purposes);
             setEUCookieLawPreferences(purposes);
         });
 
-        $('#eu-cookie-accept-necessary').on('click', function () {
-            //alert("");
+        $('#eu-cookie-dialog').on('click', '#eu-cookie-accept-necessary', function () {
             setEUCookieLawPreferences("");
+        });
+
+        $('#eu-cookie-dialog').on('change', 'input[name=purpose]', function () {
+            showEUCookieLawSelectedButton();
         });
 
         $("input[name=purpose]").change(function () {
@@ -41,8 +47,7 @@
             url: "@Url.RouteUrl("EuCookieLawAccept")?purposes=" + purposes,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
-                $('#eu-cookie-bar-notification').hide();
-                window.dispatchEvent(cookieConsentChanged);
+                window.dispatchEvent(cookieConsentAccepted);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Cannot store value');
@@ -62,39 +67,38 @@
         $('#eu-cookie-accept-selected').show();
     }
 
+
+    $(window).on('cookieConsentAccepted', function () {
+        $("#eu-cookie-dialog").html("");
+        window.dispatchEvent(cookieConsentChanged);
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("EuCookieLawChange", "Common")",
+                dataType: "html",
+                success: function (data, textStatus, jqXHR) {
+                    $("#eu-cookie-change").html(data);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Cannot get value');
+                }
+            });
+    });
+
+    $(document).ready(function () {
+        $('#eu-cookie-change').on("click", "#eu-cookie-change-button", function () {
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "@Url.Action("EuCookieLawDialog", "Common")",
+                dataType: "html",
+                success: function (data, textStatus, jqXHR) {
+                    $("#eu-cookie-dialog").html(data);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Cannot get value');
+                }
+            });
+        });
+    });
 </script>
-<div id="eu-cookie-bar-notification" class="eu-cookie-bar-notification">
-    <div class="content">
-        <div class="text">
-            <h1>@T("EUCookieLaw.Title")</h1>
-            <div class="description">@T("EUCookieLaw.Description3")</div>
-            <a class="learn-more" href="@Url.RouteUrl("Topic", new { SeName = await Html.GetTopicSeNameAsync("privacyinfo") })">@T("EUCookieLaw.LearnMore")</a>
-        </div>
-        <div class="purposes">
-            @foreach (var purpose in Model)
-            {
-                <div class="purpose">
-                    <div class="desc">
-                        <b>@T(purpose.TitleResourceKey)</b>
-                        <p>@T(purpose.DescriptionResourceKey)</p>
-                    </div>
-                    <div class="check">
-                        @if (purpose.IsNecessary)
-                        {
-                            <input type="checkbox" disabled checked />
-                        }
-                        else
-                        {
-                            <input name="purpose" type="checkbox" data-purpose="@purpose.SystemName" />
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-        <div class="cookie-buttons">
-            <button type="button" class="necessary-button" id="eu-cookie-accept-necessary">@T("EUCookieLaw.AcceptNecessary")</button>
-            <button type="button" class="all-button" id="eu-cookie-accept-all">@T("EUCookieLaw.AcceptAll")</button>
-            <button type="button" class="selected-button" id="eu-cookie-accept-selected">@T("EUCookieLaw.AcceptSelected")</button>
-        </div>
-    </div>
-</div>

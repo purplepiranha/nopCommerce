@@ -9,22 +9,26 @@ using Nop.Core.Infrastructure;
 
 namespace Nop.Services.EUCookieLaw
 {
-    public class CookieProviderManager : ICookieProviderManager
+    public class CookieRegistrar : ICookieRegistrar
     {
         #region Fields
         private readonly ITypeFinder _typeFinder;
 
         private IEnumerable<ICookieProvider> _cookieProviders;
+        private IEnumerable<ICookiePurpose> _cookiePurposes;
         #endregion
 
         #region Ctr
-        public CookieProviderManager(
-            ITypeFinder typeFinder            
+        public CookieRegistrar(
+            ITypeFinder typeFinder
             )
         {
             _typeFinder = typeFinder;
 
             _cookieProviders = LoadAllCookieProviders().OrderBy(x => x.Order).ThenBy(x => x.Name).ToList();
+
+            // we only get the purposes that are in use, rather than a list of everything possible
+            _cookiePurposes = _cookieProviders.Select(x => x.CookiePurpose).Distinct(new CookiePurposeEqualityComparer()).OrderBy(x => x.Order).ThenBy(x => x.SystemName).ToList();
         }
         #endregion
 
@@ -32,6 +36,11 @@ namespace Nop.Services.EUCookieLaw
         public IEnumerable<ICookieProvider> GetAllCookieProviders()
         {
             return _cookieProviders;
+        }
+
+        public IEnumerable<ICookiePurpose> GetAllCookiePurposes()
+        {
+            return _cookiePurposes;
         }
         #endregion
 

@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nop.Core.EUCookieLaw;
+using Nop.Core.Http;
 using Nop.Services.EUCookieLaw;
-using Nop.Web.Framework.EUCookieLaw.Purposes;
 
-namespace Nop.Web.Framework.EUCookieLaw.Providers
+namespace Nop.Web.Framework.EUCookieLaw
 {
-    public class WebsiteNecessaryCookieProvider : BaseCookieProvider<NecessaryCookiePurpose>, ICookieProvider
+    public class WebsitePreferenceCookieProvider : BaseCookieProvider<PreferenceCookiePurpose>, ICookieProvider
     {
-        public WebsiteNecessaryCookieProvider() : base()
+        public WebsitePreferenceCookieProvider() : base()
         {
         }
 
@@ -23,6 +23,9 @@ namespace Nop.Web.Framework.EUCookieLaw.Providers
         public string PrivacyPolicyUrl => string.Empty;
 
         public override int Order => -1; // always show before others
+
+        public string[] CookieNames => new string[] {
+        };
 
         public async Task<bool> IsActiveAsync()
         {

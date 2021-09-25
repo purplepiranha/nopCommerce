@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Nop.Core.EUCookieLaw;
-using Nop.Services.EUCookieLaw;
-
-namespace Nop.Web.Framework.EUCookieLaw.Purposes
+﻿namespace Nop.Core.EUCookieLaw
 {
     public class NecessaryCookiePurpose : ICookiePurpose
     {

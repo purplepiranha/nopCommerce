@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
-using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers;
+using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw;
 using Nop.Plugin.Widgets.GoogleAnalytics.Models;
 using Nop.Services.Configuration;
 using Nop.Services.EUCookieLaw;
@@ -24,7 +24,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
-        private readonly ICookiePurposeManager _cookiePurposeManager;
+        private readonly ICookieManager _cookieManager;
 
         #endregion
 
@@ -36,7 +36,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
             IPermissionService permissionService,
             ISettingService settingService,
             IStoreContext storeContext,
-            ICookiePurposeManager cookiePurposeManager
+            ICookieManager cookieManager
             )
         {
             _localizationService = localizationService;
@@ -44,7 +44,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
             _permissionService = permissionService;
             _settingService = settingService;
             _storeContext = storeContext;
-            _cookiePurposeManager = cookiePurposeManager;
+            _cookieManager = cookieManager;
         }
 
         #endregion
@@ -128,8 +128,8 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Controllers
         [HttpGet]
         public async Task<IActionResult> GetConsentStatus()
         {
-            var ads = (await _cookiePurposeManager.IsProviderAllowed<GoogleMarketingCookieProvider>()) ? "granted" : "denied";
-            var analytics = await _cookiePurposeManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>() ? "granted" : "denied";
+            var ads = _cookieManager.IsProviderAllowed<GoogleMarketingCookieProvider>() ? "granted" : "denied";
+            var analytics = _cookieManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>() ? "granted" : "denied";
             return new JsonResult(new { ad_storage = ads, analytics_storage = analytics });
         }
         #endregion

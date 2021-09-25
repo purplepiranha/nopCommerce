@@ -1,0 +1,36 @@
+﻿@model IList<Nop.Core.EUCookieLaw.ICookiePurpose> 
+<div id="eu-cookie-bar-notification" class="eu-cookie-bar-notification">
+    <div class="content">
+        <div class="text">
+            <h1>@T("EUCookieLaw.Title")</h1>
+            <div class="description">@T("EUCookieLaw.Description3")</div>
+            <a class="learn-more" href="@Url.RouteUrl("Topic", new { SeName = await Html.GetTopicSeNameAsync("privacyinfo") })">@T("EUCookieLaw.LearnMore")</a>
+        </div>
+        <div class="purposes">
+            @foreach (var purpose in Model)
+            {
+                <div class="purpose">
+                    <div class="desc">
+                        <b>@T(purpose.TitleResourceKey)</b>
+                        <p>@T(purpose.DescriptionResourceKey)</p>
+                    </div>
+                    <div class="check">
+                        @if (purpose.IsNecessary)
+                        {
+                            <input type="checkbox" disabled checked />
+                        }
+                        else
+                        {
+                            <input name="purpose" type="checkbox" data-purpose="@purpose.SystemName" />
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="cookie-buttons">
+            <button type="button" class="necessary-button" id="eu-cookie-accept-necessary">@T("EUCookieLaw.AcceptNecessary")</button>
+            <button type="button" class="all-button" id="eu-cookie-accept-all">@T("EUCookieLaw.AcceptAll")</button>
+            <button type="button" class="selected-button" id="eu-cookie-accept-selected">@T("EUCookieLaw.AcceptSelected")</button>
+        </div>
+    </div>
+</div>

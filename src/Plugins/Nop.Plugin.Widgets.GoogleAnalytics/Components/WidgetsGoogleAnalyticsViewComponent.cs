@@ -8,7 +8,7 @@ using Nop.Core;
 using Nop.Core.Domain;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
-using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers;
+using Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw;
 using Nop.Plugin.Widgets.GoogleAnalytics.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
@@ -42,7 +42,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
         private readonly StoreInformationSettings _storeInformationSettings;
-        private readonly ICookiePurposeManager _cookiePurposeManager;
+        private readonly ICookieManager _cookieManager;
 
         #endregion
 
@@ -61,7 +61,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             IStoreContext storeContext,
             IWorkContext workContext,
             StoreInformationSettings storeInformationSettings,
-            ICookiePurposeManager cookiePurposeManager)
+            ICookieManager cookieManager)
         {
             _currencySettings = currencySettings;
             _googleAnalyticsSettings = googleAnalyticsSettings;
@@ -76,7 +76,7 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             _storeContext = storeContext;
             _workContext = workContext;
             _storeInformationSettings = storeInformationSettings;
-            _cookiePurposeManager = cookiePurposeManager;
+            _cookieManager = cookieManager;
         }
 
         #endregion
@@ -195,16 +195,19 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.Components
             // consent
             if (_storeInformationSettings.DisplayEuCookieLawWarning)
             {
-                var allowAnalytics = await _cookiePurposeManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>();
-                var allowMarketing = await _cookiePurposeManager.IsProviderAllowed<GoogleMarketingCookieProvider>();
+                var allowAnalytics = _cookieManager.IsProviderAllowed<GoogleAnalyticsCookieProvider>();
+                var allowMarketing = _cookieManager.IsProviderAllowed<GoogleMarketingCookieProvider>();
 
                 var consentDefaultScript = @"gtag('consent', 'default', {
                     'ad_storage': '{ADSTORAGE}',
                     'analytics_storage': '{ANALYTICSSTORAGE}'
-                });";
+                });
 
-                consentDefaultScript = consentDefaultScript.Replace("{ADSTORAGE}", allowMarketing ? "granted" : "denied");
+                gtag('set', 'allow_ad_personalization_signals', {ADPERSONALIZATION});";
+
+                consentDefaultScript = consentDefaultScript.Replace("{ADSTORAGE}", allowAnalytics ? "granted" : "denied");
                 consentDefaultScript = consentDefaultScript.Replace("{ANALYTICSSTORAGE}", allowAnalytics ? "granted" : "denied");
+                consentDefaultScript = consentDefaultScript.Replace("{ADPERSONALIZATION}", allowMarketing ? "true" : "false");
 
                 analyticsTrackingScript = analyticsTrackingScript.Replace("{CONSENT_DEFAULT}", consentDefaultScript);
             }

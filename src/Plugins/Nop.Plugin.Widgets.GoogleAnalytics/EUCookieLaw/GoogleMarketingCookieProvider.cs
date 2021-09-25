@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Nop.Core.EUCookieLaw;
-using Nop.Services.Cms;
+using Nop.Core.Infrastructure;
 using Nop.Services.EUCookieLaw;
-using Nop.Web.Framework.EUCookieLaw.Purposes;
 
-namespace Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers
+namespace Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw
 {
     public class GoogleMarketingCookieProvider : BaseWidgetPluginCookieProvider<MarketingCookiePurpose>, ICookieProvider
     {
+        private readonly GoogleAnalyticsSettings _googleAnalyticsSettings;
         public GoogleMarketingCookieProvider() : base()
         {
+            _googleAnalyticsSettings = EngineContext.Current.Resolve<GoogleAnalyticsSettings>();
         }
 
         public string SystemName => "Plugins.Widgets.GoogleAnalytics.EUCookieLaw.Providers.Google.Marketing";
@@ -23,6 +20,16 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw.Providers
         public string Description => "Description here! Do we need to use resources?";
 
         public string PrivacyPolicyUrl => "https://policies.google.com/privacy";
+
+        public string[] CookieNames => new string[] {
+            "_ga",
+            "_gid",
+            $"_ga_{_googleAnalyticsSettings.GoogleId}",
+            $"_gac_gb_{_googleAnalyticsSettings.GoogleId}",
+            "_gat",
+            "AMP_TOKEN",
+            $"_gac_{_googleAnalyticsSettings.GoogleId}"
+        };
 
         public async override Task<bool> IsActiveAsync()
         {
