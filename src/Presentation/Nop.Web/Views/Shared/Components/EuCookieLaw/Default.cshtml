@@ -44,7 +44,7 @@
         $.ajax({
             cache: false,
             type: "POST",
-            url: "@Url.RouteUrl("EuCookieLawAccept")?purposes=" + purposes,
+            url: "@Url.Action("EuCookieLawAccept","Common")?purposes=" + purposes,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
                 window.dispatchEvent(cookieConsentAccepted);

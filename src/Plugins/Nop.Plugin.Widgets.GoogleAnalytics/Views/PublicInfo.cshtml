@@ -5,7 +5,6 @@
 <script asp-location="Footer">
     $(document).ready(function () {
         $(window).on('cookieConsentChanged', function () {
-            alert("consent changed");
             $.ajax({
                 cache: false,
                 type: "GET",

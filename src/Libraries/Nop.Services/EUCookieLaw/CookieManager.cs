@@ -159,17 +159,35 @@ namespace Nop.Services.EUCookieLaw
         private void RemoveDisallowedCookies(string[] allowedPurposes)
         {
             // remove cookies for which consent has been withdrawn
-            var allCookies = _httpContextAccessor.HttpContext.Request.Cookies.Keys;
+            var allCookieKeys = _httpContextAccessor.HttpContext.Request.Cookies.Keys;
 
-            var allowed = GetAllowedCookies(allowedPurposes);
+            var allowedKeys = GetAllowedCookies(allowedPurposes).ToArray();
 
-            foreach (var cookie in allCookies)
+            var domain = _httpContextAccessor.HttpContext.Request.Host.Host;
+
+            foreach (var key in allCookieKeys)
             {
-                if (!allowed.Contains(cookie))
+
+                if (!IsCookieAllowed(allowedKeys, key))
                 {
-                    _httpContextAccessor.HttpContext.Response.Cookies.Delete(cookie);
+                    _httpContextAccessor.HttpContext.Response.Cookies.Append(key, "", new CookieOptions() { Domain = domain, Expires = DateTime.Now.AddDays(-1) });
+                    _httpContextAccessor.HttpContext.Response.Cookies.Append(key, "", new CookieOptions() { Domain = $".{domain}", Expires = DateTime.Now.AddDays(-1) });
                 }
             }
+        }
+
+        private bool IsCookieAllowed(string[] allowedCookies, string key)
+        {
+            foreach(var allowedKey in allowedCookies)
+            {
+                if (allowedKey == key)
+                    return true;
+
+                if (allowedKey.EndsWith('*') && allowedKey.TrimEnd('*') == key)
+                    return true;
+            }
+
+            return false;
         }
         #endregion
     }

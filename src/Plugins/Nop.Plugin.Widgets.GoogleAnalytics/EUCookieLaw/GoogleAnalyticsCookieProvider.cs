@@ -21,14 +21,19 @@ namespace Nop.Plugin.Widgets.GoogleAnalytics.EUCookieLaw
 
         public string PrivacyPolicyUrl => "https://policies.google.com/privacy";
 
+        ////public string[] CookieNames => new string[] {
+        ////    "_ga",
+        ////    "_gid",
+        ////    $"_ga_{_googleAnalyticsSettings.GoogleId}",
+        ////    $"_gac_gb_{_googleAnalyticsSettings.GoogleId}",
+        ////    "_gat",
+        ////    "AMP_TOKEN",
+        ////    $"_gac_{_googleAnalyticsSettings.GoogleId}"
+        ////};
+
         public string[] CookieNames => new string[] {
-            "_ga",
-            "_gid",
-            $"_ga_{_googleAnalyticsSettings.GoogleId}",
-            $"_gac_gb_{_googleAnalyticsSettings.GoogleId}",
-            "_gat",
-            "AMP_TOKEN",
-            $"_gac_{_googleAnalyticsSettings.GoogleId}"
+            "_ga*",
+            "AMP_TOKEN"
         };
 
         public async override Task<bool> IsActiveAsync()
