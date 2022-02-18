@@ -30,7 +30,7 @@ steps:
     packagesToPack: '**/*.csproj'
     versioningScheme: 'byPrereleaseNumber'
     majorVersion: '4'
-    minorVersion: '4'
+    minorVersion: '5'
     patchVersion: '0'
     
 - task: DotNetCoreCLI@2
