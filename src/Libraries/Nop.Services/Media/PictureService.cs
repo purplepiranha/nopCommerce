@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LinqToDB;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using Nop.Core;
@@ -13,7 +12,6 @@ using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
-using Nop.Services.Logging;
 using Nop.Services.Seo;
 using SkiaSharp;
 
@@ -26,7 +24,6 @@ namespace Nop.Services.Media
     {
         #region Fields
 
-        private readonly INopDataProvider _dataProvider;
         private readonly IDownloadService _downloadService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly INopFileProvider _fileProvider;
@@ -38,14 +35,12 @@ namespace Nop.Services.Media
         private readonly IUrlRecordService _urlRecordService;
         private readonly IWebHelper _webHelper;
         private readonly MediaSettings _mediaSettings;
-        private readonly ILogger _logger;
 
         #endregion
 
         #region Ctor
 
-        public PictureService(INopDataProvider dataProvider,
-            IDownloadService downloadService,
+        public PictureService(IDownloadService downloadService,
             IHttpContextAccessor httpContextAccessor,
             INopFileProvider fileProvider,
             IProductAttributeParser productAttributeParser,
@@ -55,10 +50,8 @@ namespace Nop.Services.Media
             ISettingService settingService,
             IUrlRecordService urlRecordService,
             IWebHelper webHelper,
-            MediaSettings mediaSettings,
-            ILogger logger)
+            MediaSettings mediaSettings)
         {
-            _dataProvider = dataProvider;
             _downloadService = downloadService;
             _httpContextAccessor = httpContextAccessor;
             _fileProvider = fileProvider;
@@ -70,28 +63,11 @@ namespace Nop.Services.Media
             _urlRecordService = urlRecordService;
             _webHelper = webHelper;
             _mediaSettings = mediaSettings;
-            _logger = logger;
         }
 
         #endregion
 
         #region Utilities
-
-        /// <summary>
-        /// Gets a data hash from database side
-        /// </summary>
-        /// <param name="binaryData">Array for a hashing function</param>
-        /// <param name="limit">Allowed limit input value</param>
-        /// <returns>Data hash</returns>
-        /// <remarks>
-        /// For SQL Server 2014 (12.x) and earlier, allowed input values are limited to 8000 bytes. 
-        /// https://docs.microsoft.com/en-us/sql/t-sql/functions/hashbytes-transact-sql
-        /// </remarks>
-        [Sql.Expression("CONVERT(VARCHAR(128), HASHBYTES('SHA2_512', SUBSTRING({0}, 0, {1})), 2)", ServerSideOnly = true, Configuration = ProviderName.SqlServer)]
-        [Sql.Expression("SHA2({0}, 512)", ServerSideOnly = true, Configuration = ProviderName.MySql)]
-        [Sql.Expression("encode(digest({0}, 'sha512'), 'hex')", ServerSideOnly = true, Configuration = ProviderName.PostgreSQL)]
-        public static string Hash(byte[] binaryData, int limit)
-            => throw new InvalidOperationException("This function should be used only in database code");
 
         /// <summary>
         /// Loads a picture from file
@@ -195,7 +171,7 @@ namespace Nop.Services.Media
         /// </returns>
         protected virtual Task<string> GetImagesPathUrlAsync(string storeLocation = null)
         {
-            var pathBase = _httpContextAccessor.HttpContext.Request.PathBase.Value ?? string.Empty;
+            var pathBase = _httpContextAccessor.HttpContext.Request?.PathBase.Value ?? string.Empty;
             var imagesPathUrl = _mediaSettings.UseAbsoluteImagePath ? storeLocation : $"{pathBase}/";
             imagesPathUrl = string.IsNullOrEmpty(imagesPathUrl) ? _webHelper.GetStoreLocation() : imagesPathUrl;
             imagesPathUrl += "images/";
@@ -342,7 +318,7 @@ namespace Nop.Services.Media
             if (string.IsNullOrEmpty(mimeType))
                 return format;
 
-            var parts = mimeType.ToLower().Split('/');
+            var parts = mimeType.ToLowerInvariant().Split('/');
             var lastPart = parts[^1];
 
             switch (lastPart)
@@ -371,8 +347,7 @@ namespace Nop.Services.Media
         protected virtual string GetMimeTypeFromFileName(string fileName)
         {
             var provider = new FileExtensionContentTypeProvider();
-            string contentType;
-            if (!provider.TryGetContentType(fileName, out contentType))
+            if (!provider.TryGetContentType(fileName, out var contentType))
             {
                 contentType = "application/octet-stream";
             }
@@ -386,7 +361,7 @@ namespace Nop.Services.Media
         /// <param name="format">Destination format</param>
         /// <param name="targetSize">Target size</param>
         /// <returns>Image as array of byte[]</returns>
-        protected virtual async Task<byte[]> ImageResizeAsync(SKBitmap image, SKEncodedImageFormat format, int targetSize)
+        protected virtual byte[] ImageResize(SKBitmap image, SKEncodedImageFormat format, int targetSize)
         {
             if (image == null)
                 throw new ArgumentNullException("Image is null");
@@ -418,9 +393,8 @@ namespace Nop.Services.Media
                 //In order to exclude saving pictures in low quality at the time of installation, we will set the value of this parameter to 80 (as by default)
                 return cropImage.Encode(format, _mediaSettings.DefaultImageQuality > 0 ? _mediaSettings.DefaultImageQuality : 80).ToArray();
             }
-            catch (Exception e)
+            catch
             {
-                await _logger.WarningAsync("Image resize failed", e);
                 return image.Bytes;
             }
 
@@ -533,7 +507,7 @@ namespace Nop.Services.Media
                     using var image = SKBitmap.Decode(filePath);
                     var codec = SKCodec.Create(filePath);
                     var format = codec.EncodedFormat;
-                    var pictureBinary = await ImageResizeAsync(image, format, targetSize);
+                    var pictureBinary = ImageResize(image, format, targetSize);
                     var mimeType = GetMimeTypeFromFileName(thumbFileName);
                     SaveThumbAsync(thumbFilePath, thumbFileName, mimeType, pictureBinary).Wait();
                 }
@@ -666,7 +640,7 @@ namespace Nop.Services.Media
                         {
                             using var image = SKBitmap.Decode(pictureBinary);
                             var format = GetImageFormatByMimeType(picture.MimeType);
-                            pictureBinary = await ImageResizeAsync(image, format, targetSize);
+                            pictureBinary = ImageResize(image, format, targetSize);
                         }
                         catch
                         {
@@ -990,9 +964,8 @@ namespace Nop.Services.Media
 
             var seoFilename = CommonHelper.EnsureMaximumLength(picture.SeoFilename, 100);
 
-            //delete old thumbs if a picture has been changed
-            if (seoFilename != picture.SeoFilename)
-                await DeletePictureThumbsAsync(picture);
+            //delete old thumbs if exists
+            await DeletePictureThumbsAsync(picture);
 
             picture.SeoFilename = seoFilename;
 
@@ -1060,7 +1033,7 @@ namespace Nop.Services.Media
         /// A task that represents the asynchronous operation
         /// The task result contains the picture binary or throws an exception
         /// </returns>
-        public virtual async Task<byte[]> ValidatePictureAsync(byte[] pictureBinary, string mimeType)
+        public virtual Task<byte[]> ValidatePictureAsync(byte[] pictureBinary, string mimeType)
         {
             try
             {
@@ -1070,39 +1043,14 @@ namespace Nop.Services.Media
                 if (Math.Max(image.Height, image.Width) > _mediaSettings.MaximumImageSize)
                 {
                     var format = GetImageFormatByMimeType(mimeType);
-                    pictureBinary = await ImageResizeAsync(image, format, _mediaSettings.MaximumImageSize);
+                    pictureBinary = ImageResize(image, format, _mediaSettings.MaximumImageSize);
                 }
-                return pictureBinary;
+                return Task.FromResult(pictureBinary);
             }
-            catch (Exception e)
+            catch
             {
-                await _logger.WarningAsync("Validate picture failed", e);
-                return pictureBinary;
+                return Task.FromResult(pictureBinary);
             }
-        }
-
-        /// <summary>
-        /// Get pictures hashes
-        /// </summary>
-        /// <param name="picturesIds">Pictures Ids</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the 
-        /// </returns>
-        public async Task<IDictionary<int, string>> GetPicturesHashAsync(int[] picturesIds)
-        {
-            if (!picturesIds.Any())
-                return new Dictionary<int, string>();
-
-            var hashes = (await _dataProvider.GetTableAsync<PictureBinary>())
-                    .Where(p => picturesIds.Contains(p.PictureId))
-                    .Select(x => new
-                    {
-                        x.PictureId,
-                        Hash = Hash(x.BinaryData, _dataProvider.SupportedLengthOfBinaryHash)
-                    });
-
-            return await AsyncIQueryableExtensions.ToDictionaryAsync(hashes, p => p.PictureId, p => p.Hash);
         }
 
         /// <summary>
