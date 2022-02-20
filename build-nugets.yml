@@ -13,27 +13,35 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET Core sdk 6.x'
+  inputs:
+    version: 6.x
 - task: DotNetCoreCLI@2
+  displayName: 'Restore Projects'
   inputs:
     command: 'restore'
     projects: '**/*.csproj'
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Build Projects'
   inputs:
     command: 'build'
     projects: '**/*.csproj'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Nuget Pack'
   inputs:
     command: 'pack'
     packagesToPack: '**/*.csproj'
     versioningScheme: 'byPrereleaseNumber'
     majorVersion: '4'
-    minorVersion: '4'
+    minorVersion: '5'
     patchVersion: '0'
     
 - task: DotNetCoreCLI@2
+  displayName: 'Nuget Push'
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
@@ -41,6 +49,7 @@ steps:
     publishVstsFeed: 'f5728cdd-f40e-4f93-b7de-b56a83829f9c/cc8aec5c-bca9-4c17-beb9-3d06532a07ee'
 
 - task: PublishSymbols@2
+  displayName: 'Publish Symbols'
   inputs:
     SearchPattern: '**/bin/**/*.pdb'
     SymbolServerType: 'TeamServices'
