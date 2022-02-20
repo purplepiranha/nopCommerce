@@ -351,21 +351,6 @@ namespace Nop.Services.Media
         }
 
         /// <summary>
-        /// Gets the MIME type from the file name
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        protected virtual string GetMimeTypeFromFileName(string fileName)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(fileName, out var contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
-
-        /// <summary>
         /// Resize image by targetSize
         /// </summary>
         /// <param name="image">Source image</param>
