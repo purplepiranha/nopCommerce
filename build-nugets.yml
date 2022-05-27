@@ -37,8 +37,8 @@ steps:
     packagesToPack: '**/*.csproj'
     versioningScheme: 'byPrereleaseNumber'
     majorVersion: '4'
-    minorVersion: '5'
-    patchVersion: '0'
+    minorVersion: '50'
+    patchVersion: '2'
     
 - task: DotNetCoreCLI@2
   displayName: 'Nuget Push'
